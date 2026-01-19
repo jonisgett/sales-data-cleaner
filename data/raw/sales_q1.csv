@@ -1,0 +1,6 @@
+Order_ID,customer name,Product,quantity,Price,Date
+1001,John Doe,Laptop,2,999.99,2024-01-15
+1002,Jane Smith,Mouse,5,25.50,01/16/2024
+1003,Bob Johnson,Keyboard,,75.00,2024-01-17
+1004,Alice Williams,Monitor,1,350,2024/01/18
+1005,,Laptop,3,999.99,15-Jan-2024

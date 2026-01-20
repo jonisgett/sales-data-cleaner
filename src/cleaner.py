@@ -95,6 +95,92 @@ output_df = pd.DataFrame(combined_file_final_clean)
 output_df.to_csv('data/processed/cleaned_sales.csv', index=False)
 print("\n✅ Cleaned data exported to: data/processed/cleaned_sales.csv")
 
+# get unique products from each of the files
+csv_products = {record["product"] for record in cleaned_csv if record.get("product")}
+json_products = {record["product"] for record in cleaned_json if record.get("product")}
+xls_products = {record["product"] for record in cleaned_xls if record.get("product")}
+
+# All unique products would be the union of all 3 sets
+all_products = csv_products | json_products | xls_products
+
+# The products that are in each of the 3 files (intersection)
+common_products = csv_products & json_products & xls_products
+
+# The products that are "unique" to each of the 3 files
+unique_csv_products = csv_products - json_products - xls_products
+unique_json_products = json_products - csv_products - xls_products
+unique_xls_products = xls_products - csv_products - json_products
+
+# Unique Customers accross the entire cleaned joined file
+all_customers = {record["customer_name"] for record in combined_file_final_clean if record.get("customer_name")}
+
+# Print set operation results
+print("\n" + "="*60)
+print("SET OPERATIONS - Product Analysis")
+print("="*60)
+print(f"Total unique products across all files: {len(all_products)}")
+print(f"All products: {sorted(all_products)}\n")
+
+print(f"Products in ALL three files: {len(common_products)}")
+print(f"Common products: {sorted(common_products)}\n")
+
+print(f"Products ONLY in CSV: {len(unique_csv_products)}")
+print(f"CSV-only products: {sorted(unique_csv_products)}\n")
+
+print(f"Products ONLY in JSON: {len(unique_json_products)}")
+print(f"JSON-only products: {sorted(unique_json_products)}\n")
+
+print(f"Products ONLY in Excel: {len(unique_xls_products)}")
+print(f"Excel-only products: {sorted(unique_xls_products)}\n")
+
+print(f"Total unique customers: {len(all_customers)}")
+print(f"Customer list: {sorted(all_customers)}")
+
+product_stats = []
+for product in all_products:
+    total_quantity = sum([record["quantity"] for record in combined_file_final_clean if record.get("quantity") and record["product"] == product])
+    total_revenue = sum([(record["quantity"] * record["unit_price"]) for record in combined_file_final_clean if record.get("quantity") and record.get("unit_price") and record["product"] == product])
+    product_stats.append((product, total_quantity, total_revenue))
+
+# Sort by revenue (highest first)
+product_stats.sort(key=lambda x: x[2], reverse=True)
+
+print("\n" + "="*60)
+print("PRODUCT REVENUE STATISTICS")
+print("="*60)
+print(f"{'Product':<15} | {'Quantity':>8} | {'Revenue':>12}")
+print("-" * 60)
+for product, qty, revenue in product_stats:
+    print(f"{product:<15} | {qty:>8} | ${revenue:>11,.2f}")
+
+    # ============================================
+# TOP CUSTOMERS
+# ============================================
+
+customer_stats = []
+for customer in all_customers:
+    order_count = sum(1 for record in combined_file_final_clean if record["customer_name"] == customer)
+    total_spent = sum(record["quantity"] * record["unit_price"] 
+                     for record in combined_file_final_clean 
+                     if record["customer_name"] == customer)
+    
+    customer_stats.append((customer, order_count, total_spent))
+
+# Sort by total spent (highest first) and take top 5
+customer_stats.sort(key=lambda x: x[2], reverse=True)
+top_5_customers = customer_stats[:5]
+
+print("\n" + "="*60)
+print("TOP 5 CUSTOMERS")
+print("="*60)
+print(f"{'Customer':<20} | {'Orders':>7} | {'Total Spent':>12}")
+print("-" * 60)
+for customer, orders, spent in top_5_customers:
+    print(f"{customer:<20} | {orders:>7} | ${spent:>11,.2f}")
+
+
+
+
 
         
 

@@ -91,6 +91,10 @@ print("="*50)
 for record in combined_file_final_clean[:3]:
     print(record)
 
+output_df = pd.DataFrame(combined_file_final_clean)
+output_df.to_csv('data/processed/cleaned_sales.csv', index=False)
+print("\n✅ Cleaned data exported to: data/processed/cleaned_sales.csv")
+
 
         
 
